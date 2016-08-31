@@ -1,0 +1,52 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+	<style>
+		@import 'https://fonts.googleapis.com/css?family=Open+Sans';
+	</style>
+	</head>
+	<body>
+		<div id="header">
+			<h1>Catalog</h1>
+
+			<div id="logout">
+				<a href= "{{url_for('gdisconnect')}}">Logout</a>
+			</div>		
+			
+		</div>
+		
+		<div id="nav">
+		
+			{% for c in categories %}
+				<a href= "{{url_for('view_category_items', category_id = c.id)}}">{{c.name}}</a>
+			{% endfor %}
+			<a href= "/"> Home </a>
+
+		</div>	
+
+		<div id="section">
+			<h2><u>{{item.name}}</u></h2>
+	
+
+		<form action="{{url_for('delete_item', item_id=item.id)}}" method ='POST'>
+			
+				Are you sure you want to delete this item?
+				<input type='submit' value='Delete'>
+			</form>
+
+
+
+
+
+
+		
+			
+
+		</div>	
+
+
+	</body>
+
+
+</html>
+

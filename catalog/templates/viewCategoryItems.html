@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+	<style>
+		@import 'https://fonts.googleapis.com/css?family=Open+Sans';
+	</style>
+	</head>
+	<body>
+		<div id="header">
+			<h1>Catalog</h1>
+			
+			<div id="login">
+				<a href="{{url_for('showLogin')}}">Login </a>
+			</div>
+			
+		</div>
+
+		
+		<div id="nav">
+		
+			<a href= '/'> Home </a>
+			</br>
+			{% for c in categories %}
+				<a href= "{{url_for('view_category_items', category_id = c.id)}}">{{c.name}}</a>
+			{% endfor %}
+
+
+		</div>	
+
+		<div id="section">
+			<h1><u>Items</h1></u>
+			{% for i in items %}
+				{% for c in categories %}
+						{% if i.category_id == c.id %}
+						<a href="{{url_for('view_item', category_id = c.id, item_id = i.id)}}">{{i.name}}
+						{% endif %}
+					{% endfor %}
+				
+			
+				</br>
+				</a>
+			{% endfor %}
+
+
+
+		</div>	
+		
+
+	</body>
+
+
+</html>
+
