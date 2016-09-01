@@ -1,4 +1,11 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, jsonify
+from flask import (Flask,
+                   render_template,
+                   request,
+                   redirect,
+                   jsonify,
+                   url_for,
+                   flash,
+                   jsonify)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, User, Category, Item
@@ -98,8 +105,8 @@ def gconnect():
     stored_credentials = login_session.get('credentials')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+            'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -132,7 +139,7 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 150px; height: 150px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px; padding: 30px;"> '
+    output += ' " style = "width: 150px; height: 150px;border-radius: 150px; -webkit-border-radius:150px; -moz-border-radius: 150px; padding: 30px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
@@ -220,9 +227,13 @@ def main():
     categories = session.query(Category).all()
     all_items = session.query(Item).all()
     if 'username' not in login_session:
-        return render_template('viewCatalog.html', categories=categories, items=all_items)
+        return render_template('viewCatalog.html',
+                               categories=categories,
+                               items=all_items)
     else:
-        return render_template('catalog.html', categories=categories, items=all_items)
+        return render_template('catalog.html',
+                               categories=categories,
+                               items=all_items)
 
 
 # View items in a category
@@ -231,9 +242,13 @@ def view_category_items(category_id):
     categories = session.query(Category).all()
     items = session.query(Item).filter_by(category_id=category_id).all()
     if 'username' not in login_session:
-        return render_template('viewCategoryItems.html', categories=categories, items=items)
+        return render_template('viewCategoryItems.html',
+                               categories=categories,
+                               items=items)
     else:
-        return render_template('categoryItems.html', categories=categories, items=items)
+        return render_template('categoryItems.html',
+                               categories=categories,
+                               items=items)
 
 
 # Add an item
@@ -244,7 +259,10 @@ def add_item():
     email = login_session['email']
     user_info = session.query(User).filter_by(email=email).one()
     if request.method == 'POST' and ('username' in login_session):
-        newItem = Item(name=request.form['name'], description=request.form['description'], category_id=request.form['category_dropdown'], user_id=user_info.id)
+        newItem = Item(name=request.form['name'],
+                       description=request.form['description'],
+                       category_id=request.form['category_dropdown'],
+                       user_id=user_info.id)
         session.add(newItem)
         session.commit()
         return redirect(url_for('main'))
@@ -259,7 +277,9 @@ def view_item(category_id, item_id):
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
     if 'username' not in login_session:
-        return render_template('viewItem.html', categories=categories, item=item)
+        return render_template('viewItem.html',
+                               categories=categories,
+                               item=item)
     else:
         return render_template('item.html', categories=categories, item=item)
 
@@ -270,7 +290,9 @@ def view_item(category_id, item_id):
 def edit_item(category_id, item_id):
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
-    if request.method == 'POST' and ('username' in login_session) and (item.user_id == login_session['user_id']):
+    if request.method == 'POST' and (
+                         'username' in login_session) and (
+                         item.user_id == login_session['user_id']):
         if request.form['name']:
             item.name = request.form['name']
         if request.form['description']:
@@ -283,8 +305,11 @@ def edit_item(category_id, item_id):
     elif (item.user_id != login_session['user_id']):
         return render_template('editItemNotAllowed.html',
                                categories=categories)
-    elif ('username' in login_session) and (item.user_id == login_session['user_id']):
-        return render_template('editItem.html', categories=categories, item=item)
+    elif ('username' in login_session) and (
+          item.user_id == login_session['user_id']):
+        return render_template('editItem.html',
+                               categories=categories,
+                               item=item)
     else:
         return redirect(url_for('main'))
 
@@ -295,20 +320,28 @@ def edit_item(category_id, item_id):
 def delete_item(item_id):
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
-    if request.method == 'POST' and ('username' in login_session) and (item.user_id == login_session['user_id']):
+    if request.method == 'POST' and (
+                         'username' in login_session) and (
+                         item.user_id == login_session['user_id']):
         session.delete(item)
         session.commit()
         return redirect(url_for('main'))
     elif (item.user_id != login_session['user_id']):
         return render_template('deleteItemNotAllowed.html',
                                categories=categories)
-    elif ('username' in login_session) and (item.user_id == login_session['user_id']):
-        return render_template('deleteItem.html', categories=categories, item=item)
+    elif ('username' in login_session) and (
+          item.user_id == login_session['user_id']):
+        return render_template('deleteItem.html',
+                               categories=categories,
+                               item=item)
     else:
         return redirect(url_for('main'))
 
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
+    # Debugging mode is a great tool in the development stage, however,
+    # it could be a security hole in production. Please do not forget
+    # to switch it off before deploying.
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
