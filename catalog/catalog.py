@@ -34,8 +34,8 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# Check if user is logged in
 def login_required(f):
+    """Checks if user is logged in"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in login_session:
@@ -44,18 +44,18 @@ def login_required(f):
     return decorated_function
 
 
-# Create anti-forgery state token
 @app.route('/login')
 def showLogin():
+    """Create anti-forgery state token"""
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
 
-# Authenticate a user
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Authenticate a user"""
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -146,8 +146,8 @@ def gconnect():
 
 
 # User Helper Functions
-# Create a user
 def createUser(login_session):
+    """Create a user"""
     newUser = User(name=login_session['username'], email=login_session[
                    'email'])
     session.add(newUser)
@@ -156,14 +156,14 @@ def createUser(login_session):
     return user.id
 
 
-# Gets user info based on user_id
 def getUserInfo(user_id):
+    """Get user info based on user_id"""
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
-# Get user_id based on email
 def getUserID(email):
+    """Get user_id based on email"""
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
@@ -171,10 +171,10 @@ def getUserID(email):
         return None
 
 
-# Disconnect a user and reset their login_session
 @app.route('/gdisconnect')
 def gdisconnect():
-        # Only disconnect a connected user.
+    """Disconnect a user and reset their login_session"""
+    # Only disconnect a connected user.
     credentials = login_session.get('credentials')
     if credentials is None:
         response = make_response(
@@ -205,9 +205,9 @@ def gdisconnect():
         return response
 
 
-# JSON API
 @app.route('/catalog/json')
 def catalog_json():
+    """JSON API"""
     catalog = session.query(Category)
     items = session.query(Item)
 
@@ -220,10 +220,10 @@ def catalog_json():
     return jsonify(outer_dictionary)
 
 
-# Main website - Catalog - show all categories
 @app.route('/')
 @app.route('/catalog/')
 def main():
+    """Main website - Catalog - show all categories"""
     categories = session.query(Category).all()
     all_items = session.query(Item).all()
     if 'username' not in login_session:
@@ -236,9 +236,9 @@ def main():
                                items=all_items)
 
 
-# View items in a category
 @app.route('/catalog/<int:category_id>/')
 def view_category_items(category_id):
+    """View items in a category"""
     categories = session.query(Category).all()
     items = session.query(Item).filter_by(category_id=category_id).all()
     if 'username' not in login_session:
@@ -251,10 +251,10 @@ def view_category_items(category_id):
                                items=items)
 
 
-# Add an item
 @app.route('/add/', methods=['GET', 'POST'])
 @login_required
 def add_item():
+    """ Add an item"""
     categories = session.query(Category).all()
     email = login_session['email']
     user_info = session.query(User).filter_by(email=email).one()
@@ -271,9 +271,9 @@ def add_item():
         return render_template('addItem.html', categories=categories)
 
 
-# View an item
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
 def view_item(category_id, item_id):
+    """View an item"""
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
     if 'username' not in login_session:
@@ -284,10 +284,10 @@ def view_item(category_id, item_id):
         return render_template('item.html', categories=categories, item=item)
 
 
-# Edit an item
 @app.route('/edit/<category_id>/<item_id>/', methods=['GET', 'POST'])
 @login_required
 def edit_item(category_id, item_id):
+    """Edit an item"""
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST' and (
@@ -314,10 +314,10 @@ def edit_item(category_id, item_id):
         return redirect(url_for('main'))
 
 
-# Delete an item
 @app.route('/delete/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def delete_item(item_id):
+    """Delete an item"""
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST' and (
